@@ -1,0 +1,61 @@
+.breadcum{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    flex-wrap:wrap;
+
+    margin:40px 8%;
+
+    font-size:15px;
+
+    font-weight:500;
+
+    text-transform:capitalize;
+
+    color:var(--text-color);
+}
+
+
+
+/* ARROW ICON */
+
+.breadcum img{
+
+    width:12px;
+
+    opacity:0.7;
+
+    transition:0.3s;
+}
+
+
+
+/* DARK MODE ICON FIX */
+
+.app.dark .breadcum img{
+
+    filter:invert(1);
+}
+
+
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+    .breadcum{
+
+        font-size:13px;
+
+        margin:20px 5%;
+    }
+
+    .breadcum img{
+
+        width:10px;
+    }
+}

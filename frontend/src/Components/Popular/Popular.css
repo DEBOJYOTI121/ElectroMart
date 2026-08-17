@@ -1,0 +1,36 @@
+.popular{
+    min-height:100vh;
+
+    background:var(--bg-color);
+
+    padding:70px 40px;
+}
+
+.popular h1{
+    text-align:center;
+
+    color:var(--text-color);
+
+    font-size:50px;
+}
+
+.popular hr{
+    width:180px;
+
+    margin:20px auto 60px auto;
+
+    border:none;
+    height:3px;
+
+    background:var(--accent-color);
+}
+
+.popular-item{
+    display:flex;
+
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+    gap:35px;
+}

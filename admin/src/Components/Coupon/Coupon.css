@@ -1,0 +1,153 @@
+/* ==========================
+   Coupon Page
+========================== */
+.coupon{
+    width:100%;
+    min-height:100vh;
+    padding:25px;
+    box-sizing:border-box;
+    background:var(--page-bg);
+    color:var(--text-color);
+}
+/* Heading */
+.coupon h1{
+    font-size:32px;
+    font-weight:700;
+    margin-bottom:25px;
+    color:var(--text-color);
+}
+/* ==========================
+   Form
+========================== */
+.coupon-form{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+    background:var(--card-bg);
+    padding:20px;
+    border-radius:12px;
+    box-shadow:var(--card-shadow);
+    margin-bottom:35px;
+}
+.coupon-form input{
+    height:48px;
+    padding:0 15px;
+    border-radius:8px;
+    border:1px solid var(--border-color);
+    background:var(--input-bg);
+    color:var(--text-color);
+    outline:none;
+    font-size:15px;
+}
+.coupon-form input::placeholder{
+    color:var(--placeholder-color);
+}
+.coupon-form input:focus{
+    border-color:#1976d2;
+}
+.coupon-form button{
+    height:48px;
+    border:none;
+    border-radius:8px;
+    background:#1976d2;
+    color:white;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.3s;
+}
+.coupon-form button:hover{
+    background:#1259a8;
+}
+/* ==========================
+   Table
+========================== */
+.coupon-table{
+    background:var(--card-bg);
+    border-radius:12px;
+    overflow-x:auto;
+    box-shadow:var(--card-shadow);
+}
+.coupon-table table{
+    width:100%;
+    min-width:750px;
+    border-collapse:collapse;
+}
+.coupon-table th{
+    background:#1976d2;
+    color:white;
+    padding:16px;
+    font-size:15px;
+}
+.coupon-table td{
+    padding:18px;
+    text-align:center;
+    color:var(--text-color);
+    border-bottom:1px solid var(--border-color);
+}
+.coupon-table tr:last-child td{
+    border-bottom:none;
+}
+/* ==========================
+   Status
+========================== */
+.active{
+    color:#22c55e;
+    font-weight:700;
+}
+.inactive{
+    color:#ef4444;
+    font-weight:700;
+}
+/* ==========================
+   Delete Button
+========================== */
+.delete-btn{
+    background:#ef4444;
+    color:white;
+    border:none;
+    border-radius:6px;
+    padding:8px 18px;
+    cursor:pointer;
+    transition:.3s;
+}
+.delete-btn:hover{
+    background:#dc2626;
+}
+/* ==========================
+   Responsive
+========================== */
+@media(max-width:1100px){
+    .coupon-form{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+@media(max-width:700px){
+    .coupon{
+        padding:15px;
+    }
+    .coupon h1{
+        font-size:24px;
+    }
+    .coupon-form{
+        grid-template-columns:1fr;
+    }
+}
+/* ==========================
+   Date Picker Theme
+========================== */
+
+/* Light Theme */
+.coupon-form input[type="date"]{
+    color-scheme: light;
+}
+/* Dark Theme */
+[data-theme="dark"] .coupon-form input[type="date"]{
+    color-scheme: light;
+}
+/* Chrome / Edge */
+[data-theme="dark"] .coupon-form input[type="date"]::-webkit-calendar-picker-indicator{
+    filter: invert(1) brightness(2);
+    opacity: 1;
+    cursor: pointer;
+}

@@ -1,0 +1,188 @@
+/* NEWSLETTER SECTION */
+.newsletter{
+
+    width:90%;
+    max-width:1400px;
+
+    margin:80px auto;
+
+    padding:70px 40px;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    gap:25px;
+
+    background:linear-gradient(
+        135deg,
+        #0f172a 0%,
+        #111827 50%,
+        #1e293b 100%
+    );
+
+    border-radius:25px;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.35),
+        inset 0 0 0 1px rgba(255,255,255,0.05);
+}
+
+
+
+/* HEADING */
+.newsletter h1{
+
+    color:white;
+
+    font-size:42px;
+    font-weight:700;
+
+    text-align:center;
+}
+
+
+
+/* SUBTEXT */
+.newsletter p{
+
+    color:#cbd5e1;
+
+    font-size:18px;
+
+    text-align:center;
+}
+
+
+
+/* INPUT CONTAINER */
+.newsletter-box{
+
+    width:100%;
+    max-width:700px;
+
+    display:flex;
+    align-items:center;
+
+    background:#1f2937;
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    border-radius:60px;
+
+    overflow:hidden;
+}
+
+
+
+/* INPUT */
+.newsletter input{
+
+    flex:1;
+
+    height:65px;
+
+    padding:0 30px;
+
+    border:none;
+    outline:none;
+
+    background:transparent;
+
+    color:white;
+
+    font-size:16px;
+}
+
+
+.newsletter input::placeholder{
+
+    color:#94a3b8;
+}
+
+
+
+/* BUTTON */
+.newsletter button{
+
+    width:200px;
+    height:65px;
+
+    border:none;
+
+    background:#facc15;
+
+    color:#111827;
+
+    font-size:16px;
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+
+.newsletter button:hover{
+
+    transform:scale(1.03);
+}
+
+
+
+/* TABLET */
+@media(max-width:1024px){
+
+    .newsletter h1{
+        font-size:34px;
+    }
+}
+
+
+
+/* MOBILE */
+@media(max-width:768px){
+
+    .newsletter{
+
+        padding:40px 20px;
+    }
+
+    .newsletter h1{
+
+        font-size:28px;
+    }
+
+    .newsletter p{
+
+        font-size:16px;
+    }
+
+    .newsletter-box{
+
+        flex-direction:column;
+
+        background:none;
+
+        border:none;
+
+        gap:15px;
+    }
+
+    .newsletter input{
+
+        width:100%;
+
+        border-radius:12px;
+
+        background:#1f2937;
+    }
+
+    .newsletter button{
+
+        width:100%;
+
+        border-radius:12px;
+    }
+}

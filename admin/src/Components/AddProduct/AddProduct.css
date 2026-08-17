@@ -1,0 +1,193 @@
+.add-product{
+
+    flex:1;
+
+    max-width:900px;
+
+    margin:30px auto;
+
+    padding:30px;
+
+    background:var(--bg-secondary);
+
+    border-radius:20px;
+
+    box-shadow:var(--shadow);
+}
+
+.addproduct-title {
+  font-size: 32px;
+  font-weight: 700;
+
+  margin-bottom: 30px;
+}
+
+/* ---------- FIELDS ---------- */
+
+.addproduct-itemfield {
+  width: 100%;
+  margin-bottom: 22px;
+}
+
+.addproduct-itemfield p {
+  margin-bottom: 10px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  color: var(--text-color);
+}
+
+.addproduct-itemfield input,
+.add-product-selector {
+  width: 100%;
+  height: 56px;
+
+  padding: 0 18px;
+
+  border-radius: 14px;
+
+  border: 1px solid var(--border-color);
+
+  background: var(--input-bg);
+
+  color: var(--text-color);
+
+  font-size: 15px;
+
+  outline: none;
+
+  transition: .3s;
+}
+
+.addproduct-itemfield input:focus,
+.add-product-selector:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,.15);
+}
+
+/* ---------- PRICE ---------- */
+
+.addproduct-price{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
+
+/* ---------- UPLOAD ---------- */
+
+.upload-section {
+  margin-top: 30px;
+}
+
+.upload-section p {
+  font-size: 15px;
+  font-weight: 600;
+
+  margin-bottom: 12px;
+}
+
+.upload-box{
+
+    width:100%;
+
+    max-width:250px;
+
+    height:220px;
+}
+
+.addproduct-thumbnail-img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  cursor: pointer;
+}
+
+/* ---------- BUTTON ---------- */
+
+.addproduct-btn {
+  margin-top: 25px;
+
+  width: 240px;
+  height: 56px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: linear-gradient(
+    135deg,
+    #4f46e5,
+    #7c3aed
+  );
+
+  color: white;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: .3s;
+}
+
+.addproduct-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 768px) {
+
+  .add-product {
+    width: auto;
+    margin: 10px;
+    padding: 20px;
+  }
+
+  .addproduct-price {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-box {
+    width: 180px;
+    height: 180px;
+  }
+
+  .addproduct-btn {
+    width: 100%;
+  }
+}
+.add-product,
+.addproduct-itemfield,
+.addproduct-itemfield input,
+.add-product-selector{
+    min-width:0;
+}
+@media(max-width:768px){
+
+    .add-product{
+
+        margin:10px;
+        padding:20px;
+    }
+
+    .addproduct-title{
+
+        font-size:28px;
+    }
+
+    .upload-box{
+
+        max-width:100%;
+        height:180px;
+    }
+
+    .addproduct-btn{
+
+        width:100%;
+    }
+
+}

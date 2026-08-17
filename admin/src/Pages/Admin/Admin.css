@@ -1,0 +1,13 @@
+.admin{
+    display:flex;
+    min-height:calc(100vh - 90px);
+    background:var(--bg-color);
+}
+
+@media(max-width:1024px){
+
+    .admin{
+        flex-direction:column;
+    }
+
+}
