@@ -1,6 +1,8 @@
 const Users = require("../models/User");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
+const sendEmail = require("../utils/emailService");
+const orderStatusTemplate = require("../templates/orderStatusTemplate");
 // =====================================
 // PLACE ORDER
 // =====================================
@@ -308,6 +310,13 @@ const updateOrderStatus = async (req, res) => {
         }
         order.orderStatus = status;
         await order.save();
+        // Send order status email
+        const emailHtml = orderStatusTemplate(order, status);
+        await sendEmail({
+            to: order.customerEmail,
+            subject: `Electro Mart - Order ${status}`,
+            html: emailHtml,
+        });
         console.log(
             `Order ${orderId} status changed to ${status}`
         );

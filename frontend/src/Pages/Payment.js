@@ -34,7 +34,7 @@ const Payment = () => {
             const data = await response.json();
              const options = {
 
-    key: "rzp_test_T8GYzarz4xwsGh",
+    key: "rzp_test_TRJXdVpDZ6K7jZ",
 
     amount: data.order.amount,
 

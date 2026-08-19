@@ -62,16 +62,15 @@ const Orders = () => {
   }, []);
 const updateOrderStatus = async (orderId, status) => {
     try {
-        const response = await fetch(
-            `${API_URL}/updateorderstatus`,
+        const response = await fetch( 
+            `${API_URL}/updateorderstatus/${orderId}`,
             {
-                method: "POST",
+                method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                       "auth-token": localStorage.getItem("admin-token"),
                 },
                 body: JSON.stringify({
-                    orderId,
                     status,
                 }),
             }
