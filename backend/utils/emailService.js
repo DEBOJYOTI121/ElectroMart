@@ -8,22 +8,37 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-const sendEmail = async ({
-    to,
-    subject,
-    html,
-}) => {
+transporter.verify((error, success) => {
+    if (error) {
+        console.error("❌ Gmail SMTP verification failed:");
+        console.error(error);
+    } else {
+        console.log("✅ Gmail SMTP connection verified successfully");
+    }
+});
+
+const sendEmail = async ({ to, subject, html }) => {
     try {
-        await transporter.sendMail({
+        const info = await transporter.sendMail({
             from: `"Electro Mart" <${process.env.EMAIL_USER}>`,
             to,
             subject,
             html,
         });
 
-        console.log("✅ Email Sent Successfully");
+        console.log("✅ Email Sent Successfully:", info.messageId);
+
+        return {
+            success: true,
+            messageId: info.messageId,
+        };
+
     } catch (error) {
-        console.log("❌ Email Error:", error);
+        console.error("❌ Email Sending Failed:");
+        console.error(error);
+
+        throw error;
     }
 };
+
 module.exports = sendEmail;
