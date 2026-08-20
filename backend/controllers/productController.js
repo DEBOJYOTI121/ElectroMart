@@ -4,7 +4,7 @@ const Users = require("../models/User");
 const uploadImage = (req, res) => {
     res.json({
         success: 1,
-        image_url: `http://localhost:4000/images/${req.file.filename}`,
+        image_url: `${process.env.BACKEND_URL}/images/${req.file.filename}`,
     });
 };
 const getAllProducts = async (req, res) => {

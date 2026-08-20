@@ -23,7 +23,7 @@ Thumbs.db
 *.tmp
 *.temp
 # Local uploaded images
-upload/Images/*
-!upload/Images/.gitkeep
+upload/images/*
+!upload/images/.gitkeep
 # Coverage
 coverage/

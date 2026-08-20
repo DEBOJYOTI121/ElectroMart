@@ -24,7 +24,7 @@ app.get("/", (req, res) => {
   res.send("Express App is Running");
 });
 //Creating Uplaod Endpoint 
-app.use('/images',express.static('upload/images'))
+app.use('/images',express.static('upload/Images'))
 // Server Start
 app.listen(port, (error) => {
   if (!error) {
