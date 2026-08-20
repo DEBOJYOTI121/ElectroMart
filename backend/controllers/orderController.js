@@ -311,12 +311,27 @@ const updateOrderStatus = async (req, res) => {
         order.orderStatus = status;
         await order.save();
         // Send order status email
-        const emailHtml = orderStatusTemplate(order, status);
-        await sendEmail({
-            to: order.customerEmail,
-            subject: `Electro Mart - Order ${status}`,
-            html: emailHtml,
-        });
+        try {
+            const emailHtml = orderStatusTemplate(order, status);
+
+            await sendEmail({
+                to: order.customerEmail,
+                subject: `Electro Mart - Order ${status}`,
+                html: emailHtml,
+            });
+
+            console.log(
+                `Status email sent to ${order.customerEmail}`
+            );
+
+        } catch (emailError) {
+
+            console.error(
+                "Order status email failed:",
+                emailError
+            );
+
+        }
         console.log(
             `Order ${orderId} status changed to ${status}`
         );

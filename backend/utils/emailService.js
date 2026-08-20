@@ -1,44 +1,31 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
-
-transporter.verify((error, success) => {
-    if (error) {
-        console.error("❌ Gmail SMTP verification failed:");
-        console.error(error);
-    } else {
-        console.log("✅ Gmail SMTP connection verified successfully");
-    }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async ({ to, subject, html }) => {
     try {
-        const info = await transporter.sendMail({
-            from: `"Electro Mart" <${process.env.EMAIL_USER}>`,
+        const { data, error } = await resend.emails.send({
+            from: "Electro Mart <onboarding@resend.dev>",
             to,
             subject,
             html,
         });
 
-        console.log("✅ Email Sent Successfully:", info.messageId);
+        if (error) {
+            console.error("❌ Resend Email Error:", error);
+            throw new Error(error.message || "Email sending failed");
+        }
+
+        console.log("✅ Email Sent Successfully:", data?.id);
 
         return {
             success: true,
-            messageId: info.messageId,
+            data,
         };
 
     } catch (error) {
-        console.error("❌ Email Sending Failed:");
-        console.error(error);
-
+        console.error("❌ Email Error:", error);
         throw error;
     }
 };
-
 module.exports = sendEmail;
