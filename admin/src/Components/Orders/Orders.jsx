@@ -58,8 +58,17 @@ const Orders = () => {
   }
  };
  useEffect(() => {
+    // Load orders immediately
     fetchOrders();
-  }, []);
+    // Check for new/updated orders every 3 seconds
+    const interval = setInterval(() => {
+        fetchOrders();
+    }, 3000);
+    // Stop polling when leaving the page
+    return () => {
+        clearInterval(interval);
+    };
+}, []);
 const updateOrderStatus = async (orderId, status) => {
     try {
         const response = await fetch( 

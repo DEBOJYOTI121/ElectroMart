@@ -89,8 +89,8 @@ const OrderSchema = new mongoose.Schema({
     },
 
     razorpayPaymentId: {
-        type: String,
-        default: ""
+    type: String,
+    default: ""
     },
 
     paymentTime: {
@@ -105,4 +105,16 @@ const OrderSchema = new mongoose.Schema({
         default: Date.now
     },
 });
+OrderSchema.index(
+    { razorpayPaymentId: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            razorpayPaymentId: {
+                $exists: true,
+                $ne: ""
+            }
+        }
+    }
+);
 module.exports = mongoose.model("Order", OrderSchema);

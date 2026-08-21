@@ -1,31 +1,72 @@
-const { Resend } = require("resend");
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const sendEmail = async ({ to, subject, html }) => {
     try {
-        const { data, error } = await resend.emails.send({
-            from: "Electro Mart <onboarding@resend.dev>",
-            to,
-            subject,
-            html,
-        });
 
-        if (error) {
-            console.error("❌ Resend Email Error:", error);
-            throw new Error(error.message || "Email sending failed");
+        const response = await fetch(
+            "https://api.brevo.com/v3/smtp/email",
+            {
+                method: "POST",
+
+                headers: {
+                    "accept": "application/json",
+                    "api-key": process.env.BREVO_API_KEY,
+                    "content-type": "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    sender: {
+                        name: "Electro Mart",
+                        email: "mitradebojyoti5@gmail.com"
+                    },
+
+                    to: [
+                        {
+                            email: to
+                        }
+                    ],
+
+                    subject: subject,
+
+                    htmlContent: html
+
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            console.error(
+                "❌ Brevo Email Error:",
+                data
+            );
+
+            throw new Error(
+                data.message ||
+                "Brevo email sending failed"
+            );
         }
 
-        console.log("✅ Email Sent Successfully:", data?.id);
+        console.log(
+            "✅ Brevo Email Sent Successfully:",
+            data.messageId
+        );
 
         return {
             success: true,
-            data,
+            data
         };
 
     } catch (error) {
-        console.error("❌ Email Error:", error);
+
+        console.error(
+            "❌ Email Error:",
+            error
+        );
+
         throw error;
     }
 };
+
 module.exports = sendEmail;

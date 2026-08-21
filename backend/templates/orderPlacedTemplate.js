@@ -1,4 +1,9 @@
 const orderPlacedTemplate = (order) => {
+       const frontendUrl =
+        process.env.FRONTEND_URL ||
+        "http://localhost:3000";
+        const trackOrderUrl =
+        `${frontendUrl}/myorders`;
     const productRows = order.products.map(product => `
     <tr>
         <td style="padding:10px;border:1px solid #ddd;">
@@ -290,7 +295,7 @@ const orderPlacedTemplate = (order) => {
             ">
 
             <a
-            href="http://localhost:3000/myorders"
+            href="${trackOrderUrl}"
             style="
             background:#0d6efd;
             color:white;

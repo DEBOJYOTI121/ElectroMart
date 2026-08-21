@@ -3,74 +3,168 @@ const Product = require("../models/Product");
 const Order = require("../models/Order");
 const sendEmail = require("../utils/emailService");
 const orderStatusTemplate = require("../templates/orderStatusTemplate");
+const orderPlacedTemplate = require("../templates/orderPlacedTemplate");
 // =====================================
 // PLACE ORDER
 // =====================================
 const placeOrder = async (req, res) => {
     try {
         const userId = req.user.id;
-        const userData = await Users.findById(userId);
+        const userData =
+            await Users.findById(userId);
         if (!userData) {
             return res.status(404).json({
                 success: false,
                 message: "User not found"
             });
         }
-        console.log("=================================");
-        console.log("PLACE ORDER USER:", userData.email);
-        console.log("PLACE ORDER USER ID:", userId);
+        // =====================================
+        // PAYMENT INFORMATION
+        // =====================================
+        const razorpayOrderId =
+            req.body.razorpayOrderId || "";
+        const razorpayPaymentId =
+            req.body.razorpayPaymentId || "";
+        // =====================================
+        // DUPLICATE PAYMENT PROTECTION
+        // =====================================
+        if (razorpayPaymentId) {
+            const existingOrder =
+                await Order.findOne({
+                    razorpayPaymentId:
+                        razorpayPaymentId
+                });
+            if (existingOrder) {
+                console.log(
+                    "DUPLICATE PAYMENT DETECTED:",
+                    razorpayPaymentId
+                );
+                return res.json({
+                    success: true,
+                    message:
+                        "Order already exists for this payment",
+                    order:
+                        existingOrder,
+                    duplicate: true
+                });
+            }
+        }
+        // =====================================
+        // CHECKOUT SNAPSHOT
+        // =====================================
+        const checkoutItems =
+            Array.isArray(
+                req.body.checkoutItems
+            )
+                ? req.body.checkoutItems
+                : [];
+        console.log(
+            "================================="
+        );
+        console.log(
+            "PLACE ORDER USER:",
+            userData.email
+        );
+        console.log(
+            "PLACE ORDER USER ID:",
+            userId
+        );
+        console.log(
+            "CHECKOUT ITEMS RECEIVED:",
+            checkoutItems
+        );
         console.log("PLACE ORDER CART DATA:", userData.cartData);
-        console.log("=================================");
-        const cartData = userData.cartData || {};
+        console.log("ORDER EMAIL:", userData.email);
+        console.log(
+            "RAZORPAY ORDER ID:",
+            razorpayOrderId
+        );
+        console.log(
+            "RAZORPAY PAYMENT ID:",
+            razorpayPaymentId
+        );
+        console.log(
+            "================================="
+        );
+        if (
+            checkoutItems.length === 0
+        ) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Checkout items are missing"
+            });
+        }
+        // =====================================
+        // CONVERT CHECKOUT ITEMS INTO ORDER
+        // =====================================
         const products = [];
         let subtotal = 0;
-        // =====================================
-        // CONVERT CART INTO PRODUCTS
-        // =====================================
-        const cartEntries = Object.entries(cartData);
-        for (const [itemId, itemQuantity] of cartEntries) {
-            const quantity = Number(itemQuantity);
-            const productId = Number(itemId);
+        for (
+            const item of checkoutItems
+        ) {
+            const productId =
+                Number(item.productId);
+            const quantity =
+                Number(item.quantity);
             console.log(
-                `Checking cart product ${productId}, quantity ${quantity}`
+                "Processing checkout item:",
+                {
+                    productId,
+                    quantity
+                }
             );
             if (
                 !Number.isFinite(productId) ||
+                !Number.isFinite(quantity) ||
                 quantity <= 0
             ) {
                 continue;
             }
-            const product = await Product.findOne({
-                id: productId
-            });
+            const product =
+                await Product.findOne({
+                    id: productId
+                });
             if (!product) {
                 console.log(
-                    `Product ${productId} not found in Product collection`
+                    `Product ${productId} not found`
                 );
                 continue;
             }
+            const itemTotal =
+                Number(product.new_price) *
+                quantity;
             products.push({
-                productId: product.id,
-                productName: product.name,
-                image: product.image,
-                price: product.new_price,
-                quantity: quantity
+                productId:
+                    product.id,
+                productName:
+                    product.name,
+                image:
+                    product.image,
+                price:
+                    product.new_price,
+                quantity:
+                    quantity
             });
             subtotal +=
-                product.new_price * quantity;
+                itemTotal;
         }
         console.log(
-            "ORDER PRODUCTS:",
+            "FINAL ORDER PRODUCTS:",
             products
         );
         console.log(
-            "ORDER SUBTOTAL:",
+            "CALCULATED SUBTOTAL:",
             subtotal
         );
+        // =====================================
+        // VALIDATE PRODUCTS
+        // =====================================
         if (products.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "Cart is empty"
+                message:
+                    "No valid products found"
             });
         }
         // =====================================
@@ -100,103 +194,256 @@ const placeOrder = async (req, res) => {
         // =====================================
         // COUPON / FINAL AMOUNT
         // =====================================
-        const originalAmount = subtotal;
+        const originalAmount =
+            Number(subtotal.toFixed(2));
         const couponCode =
             req.body.couponCode || "";
         const discountPercentage =
             Number(req.body.discount) || 0;
-        const discountAmount =
-            Number(req.body.discountAmount) || 0;
-        let totalAmount =
-            Number(req.body.finalAmount);
-        if (!Number.isFinite(totalAmount)) {
-            totalAmount =
-                originalAmount -
-                discountAmount;
+        /*
+          Calculate discount from the actual
+          checkout products.
+          Do NOT use the stale database cart.
+        */
+        let calculatedDiscountAmount =
+            (
+                originalAmount *
+                discountPercentage
+            ) / 100;
+        calculatedDiscountAmount =
+            Number(
+                calculatedDiscountAmount.toFixed(2)
+            );
+        /*
+          Use the calculated value when a
+          percentage discount exists.
+          This prevents the order from becoming:
+          Original: ₹4860
+          Discount: ₹3822
+          Total: ₹8918
+          which was your current problem.
+        */
+        let finalDiscountAmount =
+            calculatedDiscountAmount;
+        /*
+          If no percentage discount exists,
+          preserve zero.
+        */
+        if (
+            discountPercentage <= 0
+        ) {
+            finalDiscountAmount = 0;
         }
+        let totalAmount =
+            Number(
+                (
+                    originalAmount -
+                    finalDiscountAmount
+                ).toFixed(2)
+            );
         if (totalAmount < 0) {
             totalAmount = 0;
         }
         // =====================================
+        // OPTIONAL CLIENT AMOUNT CHECK
+        // =====================================
+        const clientFinalAmount =
+            Number(req.body.finalAmount);
+        if (
+            Number.isFinite(
+                clientFinalAmount
+            )
+        ) {
+            const difference =
+                Math.abs(
+                    clientFinalAmount -
+                    totalAmount
+                );
+            if (difference > 1) {
+                console.error(
+                    "PAYMENT AMOUNT MISMATCH",
+                    {
+                        clientFinalAmount,
+                        serverCalculatedAmount:
+                            totalAmount,
+                        originalAmount,
+                        discountPercentage,
+                        finalDiscountAmount
+                    }
+                );
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Order amount does not match checkout amount"
+                });
+            }
+
+        }
+        // =====================================
         // CREATE ORDER
         // =====================================
-        const order = new Order({
-            userId: userData._id,
-            customerName: customerName,
-            customerEmail: userData.email,
-            customerMobile: customerMobile,
-            deliveryAddress: {
-                house:
-                    deliveryAddress.house || "",
-                street:
-                    deliveryAddress.street || "",
-                city:
-                    deliveryAddress.city || "",
-                state:
-                    deliveryAddress.state || "",
-                pincode:
-                    deliveryAddress.pincode || "",
-                landmark:
-                    deliveryAddress.landmark || ""
-            },
-            products: products,
-            // PRICE INFORMATION
-            originalAmount:
-                originalAmount,
-            couponCode:
-                couponCode,
-            discountPercentage:
-                discountPercentage,
-            discountAmount:
-                discountAmount,
-            totalAmount:
-                totalAmount,
-            // PAYMENT INFORMATION
-            paymentStatus:
-                req.body.paymentStatus ||
-                "Pending",
-            razorpayOrderId:
-                req.body.razorpayOrderId ||
-                "",
-            razorpayPaymentId:
-                req.body.razorpayPaymentId ||
-                "",
-            paymentTime:
-                req.body.paymentTime
-                    ? new Date(
-                        req.body.paymentTime
-                    )
-                    : null,
-            // ORDER STATUS
-            orderStatus: "Pending"
-        });
-        await order.save();
-        console.log(
-            "ORDER CREATED:",
-            order._id
-        );
+        const order =
+            new Order({
+                userId:
+                    userData._id,
+                customerName:
+                    customerName,
+                customerEmail:
+                    userData.email,
+                customerMobile:
+                    customerMobile,
+                deliveryAddress: {
+                    house:
+                        deliveryAddress.house || "",
+                    street:
+                        deliveryAddress.street || "",
+                    city:
+                        deliveryAddress.city || "",
+                    state:
+                        deliveryAddress.state || "",
+                    pincode:
+                        deliveryAddress.pincode || "",
+                    landmark:
+                        deliveryAddress.landmark || ""
+
+                },
+                products:
+                    products,
+                // =====================================
+                // PRICE INFORMATION
+                // =====================================
+                originalAmount:
+                    originalAmount,
+                couponCode:
+                    couponCode,
+                discountPercentage:
+                    discountPercentage,
+                discountAmount:
+                    finalDiscountAmount,
+                totalAmount:
+                    totalAmount,
+                // =====================================
+                // PAYMENT INFORMATION
+                // =====================================
+                paymentStatus:
+                    req.body.paymentStatus ||
+                    "Pending",
+                razorpayOrderId:
+                    razorpayOrderId,
+                razorpayPaymentId:
+                    razorpayPaymentId,
+                paymentTime:
+                    req.body.paymentTime
+                        ? new Date(
+                            req.body.paymentTime
+                        )
+                        : null,
+                // =====================================
+                // ORDER STATUS
+                // =====================================
+                orderStatus:
+                    "Pending"
+
+            });
         // =====================================
-        // CLEAR CART
+        // SAVE ORDER
+        // =====================================
+        try {
+            await order.save();
+        } catch (saveError) {
+            // =====================================
+            // DUPLICATE RAZORPAY PAYMENT
+            // =====================================
+            if (
+                saveError.code === 11000 &&
+                razorpayPaymentId
+            ) {
+                const existingOrder =
+                    await Order.findOne({
+                        razorpayPaymentId:
+                            razorpayPaymentId
+                    });
+                if (existingOrder) {
+                    console.log(
+                        "DUPLICATE ORDER PREVENTED:",
+                        razorpayPaymentId
+                    );
+                    return res.json({
+                        success: true,
+                        message:
+                            "Order already exists for this payment",
+                        order:
+                            existingOrder,
+                        duplicate: true
+                    });
+                }
+
+            }
+
+            throw saveError;
+        }
+        console.log(
+        "ORDER CREATED:",
+        order._id
+      );
+
+    // =====================================
+    // SEND ORDER PLACED EMAIL
+    // =====================================
+    try {
+    const emailHtml =
+        orderPlacedTemplate(order);
+    await sendEmail({
+        to:
+            order.customerEmail,
+        subject:
+            `Electro Mart - Order Placed #${order._id
+                .toString()
+                .slice(-6)
+                .toUpperCase()}`,
+        html:
+            emailHtml
+    });
+    console.log(
+        `Order placed email sent to ${order.customerEmail}`
+    );
+   } catch (emailError) {
+    console.error(
+        "Order placed email failed:",
+        emailError
+    );
+   }
+   // =====================================
+   // CLEAR CART
+   // =====================================
+
+        // =====================================
+        // CLEAR CART ONLY AFTER ORDER SAVED
         // =====================================
         userData.cartData = {};
         await userData.save();
         console.log(
             "USER CART CLEARED AFTER ORDER"
         );
-        res.json({
+        // =====================================
+        // RESPONSE
+        // =====================================
+        return res.json({
             success: true,
             message:
                 "Order placed successfully",
-            order: order
+            order:
+                order
         });
     } catch (error) {
         console.error(
             "Place Order Error:",
             error
         );
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
-            message: error.message
+            message:
+                error.message
         });
     }
 };
@@ -312,8 +559,13 @@ const updateOrderStatus = async (req, res) => {
         await order.save();
         // Send order status email
         try {
-            const emailHtml = orderStatusTemplate(order, status);
-
+            console.log("=================================");
+            console.log("ORDER STATUS EMAIL");
+            console.log("ORDER ID:", order._id);
+            console.log("CUSTOMER EMAIL:", order.customerEmail);
+            console.log("STATUS:", status);
+            console.log("=================================");
+            const emailHtml = orderStatusTemplate(order, status);            
             await sendEmail({
                 to: order.customerEmail,
                 subject: `Electro Mart - Order ${status}`,

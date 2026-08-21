@@ -1,4 +1,9 @@
 const orderStatusTemplate = (order, status) => {
+        const frontendUrl =
+        process.env.FRONTEND_URL ||
+        "http://localhost:3000";
+        const trackOrderUrl =
+        `${frontendUrl}/myorders`;
     const statusMessages = {
         "Pending": {
             title: "🕒 Order Pending",
@@ -68,7 +73,7 @@ const orderStatusTemplate = (order, status) => {
 
             <div style="text-align:center;margin:30px 0;">
 
-                <a href="http://localhost:3000/myorders"
+                <a href="${trackOrderUrl}"
                 style="
                     background:#0d6efd;
                     color:white;
